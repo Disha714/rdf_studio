@@ -1,0 +1,48 @@
+@prefix rps: <https://w3id.org/rdf-pipeline-studio#> .
+@prefix freqrec: <https://bmtc.datakaveri.org/freqrec#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+## ===========================================================================
+## Clean CodeGraph ontology ONLY (classes + predicates, no pipeline instances).
+## Import this first with a clean slate, then decompose a raw script - the whole
+## pipeline you see will come from your script, and the Signature dropdowns will
+## already offer these standard classes to type against.
+## ===========================================================================
+
+## ---- Pipeline classes ----
+rps:sourceOfRecord    a owl:Class ; rdfs:label "Source of Record" .
+rps:analyticalProcess a owl:Class ; rdfs:label "Analytical Process" .
+rps:product           a owl:Class ; rdfs:label "Product" .
+freqrec:Metric        a owl:Class ; rdfs:label "Metric" .
+
+## ---- Data-structure classes (to type code inputs/outputs) ----
+## These describe the SHAPE of a value, not a domain concept. rps:structuralClass marks
+## them so the AI class generator never offers one as a parent for, or as a reuse of, a
+## domain class ("a GTFS service calendar is just a Table"). They remain valid property
+## ranges and code-signature types.
+rps:structuralClass a owl:DatatypeProperty ; rdfs:label "is a data-structure class" .
+rps:Matrix  a owl:Class ; rdfs:label "Matrix" ; rps:structuralClass true .
+rps:Table   a owl:Class ; rdfs:label "Table" ; rps:structuralClass true .
+rps:Vector  a owl:Class ; rdfs:label "Vector" ; rps:structuralClass true .
+rps:Scalar  a owl:Class ; rdfs:label "Scalar" ; rps:structuralClass true .
+rps:HashMap a owl:Class ; rdfs:label "HashMap" ; rps:structuralClass true .
+
+## ---- Predicates ----
+rps:hasInput a owl:ObjectProperty ; rdfs:label "has input" .
+rps:hasOutput a owl:ObjectProperty ; rdfs:label "has output" .
+rps:computesMetric a owl:ObjectProperty ; rdfs:label "computes metric" .
+rps:isIntermedateProcessto a owl:ObjectProperty ; rdfs:label "is intermediate process to" .
+rps:codeArtifact a owl:DatatypeProperty ; rdfs:label "code artifact" .
+rps:codeLanguage a owl:DatatypeProperty ; rdfs:label "code language" .
+rps:codeEntrypoint a owl:DatatypeProperty ; rdfs:label "code entrypoint" .
+rps:hasParameter a owl:ObjectProperty ; rdfs:label "has parameter" .
+rps:Parameter a rdfs:Class ; rdfs:label "Parameter" .
+rps:paramName a owl:DatatypeProperty ; rdfs:label "parameter name" .
+rps:paramDefault a owl:DatatypeProperty ; rdfs:label "parameter default" .
+rps:paramType a owl:DatatypeProperty ; rdfs:label "parameter type" .
+rps:signatureInput a owl:ObjectProperty ; rdfs:label "signature input" .
+rps:signatureOutput a owl:ObjectProperty ; rdfs:label "signature output" .
+rps:SignatureArg a rdfs:Class ; rdfs:label "Signature Argument" .
+rps:argName a owl:DatatypeProperty ; rdfs:label "argument name" .
+rps:argClass a owl:ObjectProperty ; rdfs:label "argument class" .

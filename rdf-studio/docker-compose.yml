@@ -1,0 +1,63 @@
+services:
+  fuseki:
+    image: stain/jena-fuseki:5.1.0
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      ADMIN_PASSWORD: ${FUSEKI_PASSWORD:-admin}
+      FUSEKI_DATASET_1: pipelines
+    ports:
+      - "3030:3030"
+    volumes:
+      - fuseki-data:/fuseki
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:3030/pipelines/query?query=ASK%7B%7D"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    init: true
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      FUSEKI_URL: http://fuseki:3030/pipelines
+      FUSEKI_USER: admin
+      FUSEKI_PASSWORD: ${FUSEKI_PASSWORD:-admin}
+      CORS_ORIGINS: http://localhost:5173,http://localhost:5174
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-5}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      # localhost inside this container is the container itself, not the host -
+      # use host.docker.internal to reach an Ollama instance running on the host.
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      # Self-hosted OpenAI-compatible endpoint (vLLM/TGI/gateway). If the server is
+      # on the host, replace a localhost/127.0.0.1 host with host.docker.internal.
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-not-needed}
+    ports:
+      - "8000:8000"
+    depends_on:
+      fuseki:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    init: true
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      VITE_API_URL: http://localhost:8000/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  fuseki-data:
+
+

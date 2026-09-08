@@ -1,0 +1,72 @@
+## ===========================================================================
+## Generic Event Analytics ontology - 4 classes total, no more. Every concept
+## in the pipeline (whichever stage, whichever artifact) is an INSTANCE of one
+## of these; differentiate instances by rdfs:label and by which properties
+## they actually use, not by minting a new class per concept.
+##
+##   ea:PipelineStage     - any processing step (cleaning, transformation, ...)
+##   ea:PipelineArtifact  - any dataset flowing through the pipeline
+##   ea:PipelineMetric    - a named, computed quantity a stage produces
+##   ea:PipelineDimension - a named grouping axis stages can aggregate by
+##
+## Class + property definitions ONLY, no instances - safe to import via
+## POST /api/import/ontology.
+## ===========================================================================
+
+@prefix rps: <https://w3id.org/rdf-pipeline-studio#> .
+@prefix ea: <https://example.org/event-analytics#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+## ---- The 4 classes ----
+ea:PipelineStage a owl:Class ;
+  rdfs:label "Pipeline Stage" ;
+  rdfs:comment "Any processing step in the event-analytics pipeline (cleaning, transformation, aggregation, reporting, ...). One class, many stage instances - distinguish them by rdfs:label and by which of the properties below they set." .
+
+ea:PipelineArtifact a owl:Class ;
+  rdfs:label "Pipeline Artifact" ;
+  rdfs:comment "Any dataset flowing through the pipeline - the raw input, an intermediate table, or the final report. One class, many instances - distinguish them by rdfs:label and by hasInput/hasOutput wiring." .
+
+ea:PipelineMetric a owl:Class ;
+  rdfs:label "Pipeline Metric" ;
+  rdfs:comment "A named, computed quantity a stage produces." .
+
+ea:PipelineDimension a owl:Class ;
+  rdfs:label "Pipeline Dimension" ;
+  rdfs:comment "A named grouping axis (e.g. category, region) that stages can group/aggregate by." .
+
+## ---- Extra object property used to link a stage to a computed metric ----
+rps:computesMetric a owl:ObjectProperty ; rdfs:label "computes metric" .
+
+## ---- Stage parameters (datatype properties, all shared by ea:PipelineStage -
+## not every stage instance needs to set every one, so none are marked required) ----
+ea:nullHandlingStrategy a owl:DatatypeProperty ;
+  rdfs:domain ea:PipelineStage ; rdfs:range xsd:string ;
+  rps:required false ; rps:multiple false ;
+  rdfs:label "Null-handling strategy" .
+
+ea:timestampFormat a owl:DatatypeProperty ;
+  rdfs:domain ea:PipelineStage ; rdfs:range xsd:string ;
+  rps:required false ; rps:multiple false ;
+  rdfs:label "Timestamp format" .
+
+ea:derivedFieldName a owl:DatatypeProperty ;
+  rdfs:domain ea:PipelineStage ; rdfs:range xsd:string ;
+  rps:required false ; rps:multiple true ;
+  rdfs:label "Derived field name" .
+
+ea:groupByKey a owl:DatatypeProperty ;
+  rdfs:domain ea:PipelineStage ; rdfs:range xsd:string ;
+  rps:required false ; rps:multiple true ;
+  rdfs:label "Group-by key" .
+
+ea:aggregationWindow a owl:DatatypeProperty ;
+  rdfs:domain ea:PipelineStage ; rdfs:range xsd:string ;
+  rps:required false ; rps:multiple false ;
+  rdfs:label "Aggregation window" .
+
+ea:reportFormat a owl:DatatypeProperty ;
+  rdfs:domain ea:PipelineStage ; rdfs:range xsd:string ;
+  rps:required false ; rps:multiple false ;
+  rdfs:label "Report format" .

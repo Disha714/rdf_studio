@@ -1,0 +1,11 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rps: <https://w3id.org/rdf-pipeline-studio#> .
+
+rps:AnalyticStageShape a sh:NodeShape ;
+  sh:targetClass rps:analyticalProcess ;
+  sh:property [ sh:path rps:hasOutput ; sh:minCount 1 ; sh:message "AnalyticStage must have at least one output." ] .
+
+rps:ProductShape a sh:NodeShape ;
+  sh:targetClass rps:product ;
+  sh:property [ sh:path rdfs:label ; sh:minCount 1 ; sh:message "Product must have an rdfs:label." ] .

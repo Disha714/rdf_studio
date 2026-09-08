@@ -1,0 +1,93 @@
+## ===========================================================================
+## Generic Event Analytics pipeline (INSTANCE triples ONLY - import via
+## POST /api/import/pipeline, AFTER ontology.ttl has been imported via
+## POST /api/import/ontology).
+##
+## 12 instances, only 4 classes: 4 ea:PipelineStage, 5 ea:PipelineArtifact,
+## 1 ea:PipelineMetric, 2 ea:PipelineDimension. Every instance ALSO carries the
+## app's actual runtime taxonomy type (rps:analyticalProcess / rps:product /
+## rps:intermediateProduct / rps:finalProduct / freqrec:SourceOfRecord /
+## freqrec:Metric) since Fuseki does no subclass inference and the AI modules
+## (modify.py, generate.py, verify.py, attach.py, rdf_consistency.py) match on
+## those exact types.
+## ===========================================================================
+
+@prefix rps: <https://w3id.org/rdf-pipeline-studio#> .
+@prefix freqrec: <https://bmtc.datakaveri.org/freqrec#> .
+@prefix ea: <https://example.org/event-analytics#> .
+@prefix pl: <https://example.org/pipeline/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+## ---- Source (1 of 5 PipelineArtifact instances) ----
+pl:rawEvents a ea:PipelineArtifact, freqrec:SourceOfRecord ;
+  rdfs:label "Raw Events" ;
+  rdfs:comment "The uploaded raw event records before any cleaning." ;
+  rps:canvasX 0 ; rps:canvasY 0 .
+
+## ---- Stage 1: Cleaning (1 of 4 PipelineStage instances) ----
+pl:cleaningStage a ea:PipelineStage, rps:analyticalProcess ;
+  rdfs:label "Cleaning Stage" ;
+  rdfs:comment "Handles missing values and normalizes timestamps in raw events." ;
+  rps:hasInput pl:rawEvents ;
+  rps:hasOutput pl:cleanedEvents ;
+  ea:nullHandlingStrategy "drop" ;
+  ea:timestampFormat "ISO8601" ;
+  rps:canvasX 240 ; rps:canvasY 0 .
+
+pl:cleanedEvents a ea:PipelineArtifact, rps:intermediateProduct ;
+  rdfs:label "Cleaned Events" ;
+  rps:canvasX 480 ; rps:canvasY 0 .
+
+## ---- Stage 2: Transformation ----
+pl:transformationStage a ea:PipelineStage, rps:analyticalProcess ;
+  rdfs:label "Transformation Stage" ;
+  rdfs:comment "Derives new fields (value per hour, weekend flag) from cleaned events." ;
+  rps:hasInput pl:cleanedEvents ;
+  rps:hasOutput pl:enrichedEvents ;
+  ea:derivedFieldName "value_per_hour" ;
+  ea:derivedFieldName "is_weekend" ;
+  rps:canvasX 720 ; rps:canvasY 0 .
+
+pl:enrichedEvents a ea:PipelineArtifact, rps:intermediateProduct ;
+  rdfs:label "Enriched Events" ;
+  rps:canvasX 960 ; rps:canvasY 0 .
+
+## ---- Stage 3: Aggregation ----
+pl:aggregationStage a ea:PipelineStage, rps:analyticalProcess ;
+  rdfs:label "Aggregation Stage" ;
+  rdfs:comment "Groups enriched events by category and region over a time window." ;
+  rps:hasInput pl:enrichedEvents ;
+  rps:hasOutput pl:categoryRegionSummary ;
+  rps:computesMetric pl:avgValueMetric ;
+  ea:groupByKey "category" ;
+  ea:groupByKey "region" ;
+  ea:aggregationWindow "daily" ;
+  rps:canvasX 1200 ; rps:canvasY 0 .
+
+pl:categoryRegionSummary a ea:PipelineArtifact, rps:intermediateProduct ;
+  rdfs:label "Category/Region Summary" ;
+  rps:canvasX 1440 ; rps:canvasY 0 .
+
+## ---- Stage 4: Report ----
+pl:reportStage a ea:PipelineStage, rps:analyticalProcess ;
+  rdfs:label "Report Stage" ;
+  rdfs:comment "Formats the aggregated summary into the final report artifact." ;
+  rps:hasInput pl:categoryRegionSummary ;
+  rps:hasOutput pl:eventSummaryReport ;
+  ea:reportFormat "csv" ;
+  rps:canvasX 1680 ; rps:canvasY 0 .
+
+pl:eventSummaryReport a ea:PipelineArtifact, rps:finalProduct ;
+  rdfs:label "Event Summary Report" ;
+  rps:canvasX 1920 ; rps:canvasY 0 .
+
+## ---- Metric (1 of 1 PipelineMetric instance) ----
+pl:avgValueMetric a ea:PipelineMetric, freqrec:Metric ;
+  rdfs:label "Average Value" ;
+  freqrec:formula "avg(value) grouped by category, region" ;
+  freqrec:unit "value units" ;
+  freqrec:groundedIn "Aggregation Stage output" .
+
+## ---- Dimensions (2 of 2 PipelineDimension instances - unwired, for reuse tests) ----
+pl:categoryDim a ea:PipelineDimension ; rdfs:label "Category" .
+pl:regionDim a ea:PipelineDimension ; rdfs:label "Region" .

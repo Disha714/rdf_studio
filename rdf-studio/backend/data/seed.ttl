@@ -1,0 +1,20 @@
+@prefix rps: <https://w3id.org/rdf-pipeline-studio#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+rps: a owl:Ontology ;
+  rdfs:label "RDF Pipeline Studio ontology" ;
+  rps:defaultClassesRemoved true .
+
+rps:hasInput a owl:ObjectProperty ; rdfs:label "has input" .
+rps:hasOutput a owl:ObjectProperty ; rdfs:label "has output" .
+
+rps:canvasX a owl:DatatypeProperty ; rdfs:label "canvas X position" .
+rps:canvasY a owl:DatatypeProperty ; rdfs:label "canvas Y position" .
+rps:sourceHandle a owl:DatatypeProperty ; rdfs:label "source connection point" .
+rps:targetHandle a owl:DatatypeProperty ; rdfs:label "target connection point" .
+rps:required a owl:DatatypeProperty ; rdfs:label "property is required" .
+rps:multiple a owl:DatatypeProperty ; rdfs:label "property allows multiple values" .
+rps:cardinality a owl:DatatypeProperty ; rdfs:label "relationship cardinality" .
+rps:globalRelationship a owl:DatatypeProperty ; rdfs:label "reusable class relationship" .
+rps:resourceDomain a owl:ObjectProperty ; rdfs:label "resource-specific property owner" .
